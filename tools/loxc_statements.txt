@@ -1,0 +1,5 @@
+# loxc statments. Add items to this file and they will be
+# automatically added to src/stmt.h
+PrintStmt   : Expr expression
+ExprStmt    : Expr expression
+VarStmt     : loxc::token name, Expr initializer

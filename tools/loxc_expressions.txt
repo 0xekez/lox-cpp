@@ -1,0 +1,18 @@
+## In Loxc expressions are just data. They have no methods attached to them.
+## Loxc uses std::variant with std::visit to perform operations on expressions.
+## The syntax for a new expression: <name> : <type> <name>, <type> <name>, ...
+## to include more files modify expression_generatior.py
+
+# Infix arithmetic (+, -, *, /) and logic (==, !=, <, <=, >, >=).
+BinaryExpr   : Expr left, loxc::token op, Expr right
+
+# Parentheses.
+GroupingExpr : Expr expression
+
+# Numbers, strings, Booleans, and nil.
+LiteralExpr  : Val value
+
+# A prefix ! to perform a logical not, and - to negate a number.
+UnaryExpr    : loxc::token op, Expr right
+
+VarExpr      : loxc::token name
