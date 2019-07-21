@@ -1,0 +1,6 @@
+// here are some things lox-cpp can do right now
+print "hello " + "world!";
+print 1 + 1;
+var a = (2 * (3 / 5)) + 4;
+print a + 4;
+
