@@ -28,17 +28,35 @@ private:
 public:
     void define (std::string name, Val value)
     {
-        // We let variables be reassigned. 
+        // We let variables be reassigned.
+        // This is a design choice that I'm not actually sure I like.
         val_map.insert_or_assign(std::move(name), std::move(value));
+
+        // for (const auto& item : val_map)
+        //     std::cout << item.first << " -> " << item.second << "\n";
+    }
+
+    void assign (const loxc::token& name, Val value)
+    {
+        auto where = val_map.find(name.lexme);
+        if (where == val_map.end())
+            throw op::runtime_error(name, "Undefined variable '" + name.lexme + "'.");
+        where->second = value;
     }
 
     Val get (const loxc::token& name)
     {
         auto where = val_map.find(name.lexme);
         if (where == val_map.end())
-            throw op::runtime_error(name, "Undefined variable '" + name.lexme + "'.");
+            {
+            if ( ! parent )
+                throw op::runtime_error(name, "Undefined variable '" + name.lexme + "'.");
+            return parent->get(name);
+            }
         return where->second;
     }
+
+    std::shared_ptr<Enviroment> parent;
 };
 
 #endif

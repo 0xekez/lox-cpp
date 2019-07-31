@@ -18,6 +18,7 @@ def make_init ():
         description,
         '#include <memory> // std::shared_ptr',
         '#include <variant>',
+        '#include <vector>',
         '#include "expr.h"',
     )) + "\n\n"
 
@@ -47,7 +48,7 @@ def make_stmt (class_name, rest):
 def make_expr_using_declaration (names):
     out = "using Stmt = std::variant<\n\tstd::monostate,\n\t"
     out += ",\n\t".join(["std::shared_ptr<struct {}>".format(name) for name in names])
-    out += ">;\n\n"
+    out += " >;\n\n"
     return out
 
 def main ():

@@ -5,6 +5,7 @@
 #include <string>
 #include <sstream>
 #include <variant>
+#include <algorithm>
 
 #include <memory>
 
@@ -14,6 +15,9 @@
 #include "token.h"
 #include "parse.h"
 #include "reporter.h"
+#include "enviroment.h"
+
+std::shared_ptr<Enviroment> global_env(new Enviroment());
 
 enum return_status
 {
@@ -79,11 +83,9 @@ int run(std::string in)
 
   try
   {
-
     std::for_each(expr.value().begin(), expr.value().end(), [](Stmt s) {
-      Val val = std::visit(op::interpreter(), s);
-      // if ( ! (val.index() == 0) ) 
-      //   std::cout << val << "\n";
+      // The parent of the top level interpreter is the global variables.
+      Val val = std::visit(op::interpreter(global_env), s);
       });
   }
   catch(const op::runtime_error& e)

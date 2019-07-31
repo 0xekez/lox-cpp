@@ -15,4 +15,8 @@ LiteralExpr  : Val value
 # A prefix ! to perform a logical not, and - to negate a number.
 UnaryExpr    : loxc::token op, Expr right
 
+# A variable. Evaluates to its value.
 VarExpr      : loxc::token name
+
+# Redefinition of a variable.
+RedefExpr    : loxc::token name, Expr value

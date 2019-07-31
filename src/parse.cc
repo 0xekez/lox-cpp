@@ -54,6 +54,7 @@ Stmt Parser::variableDeclaration()
 Stmt Parser::statement()
 {
     if (match(loxc::PRINT)) return printStatement();
+    if (match(loxc::LEFT_BRACE)) return blockStatement();
 
     return expressionStatement();
 }
@@ -65,17 +66,48 @@ Stmt Parser::printStatement()
     return std::make_shared<PrintStmt>(std::move(value));
 }
 
+Stmt Parser::blockStatement()
+{
+    std::vector<Stmt> stmt_list;
+
+    while ( ! (check(loxc::RIGHT_BRACE) || isAtEnd()) )
+        stmt_list.push_back(declaration());
+    
+    consume(loxc::RIGHT_BRACE, "Expected a closing bracket.");
+    return std::make_shared<BlockStmt>(std::move(stmt_list));
+}
+
 Stmt Parser::expressionStatement()
 {
     Expr expr = expression();
     consume(loxc::SEMICOLON, "Expected ; after expression statment.");
-    return std::make_shared<PrintStmt>(std::move(expr));
+    return std::make_shared<ExprStmt>(std::move(expr));
 }
 
 Expr Parser::expression()
 {
-    return equality();
+    return assignment();
 }
+
+Expr Parser::assignment()
+    {
+    Expr expr = equality();
+
+    if(match(loxc::EQUAL))
+        {
+        loxc::token equals = previous();
+        Expr val = assignment();
+
+        if (std::holds_alternative<std::shared_ptr<VarExpr>>(expr))
+            {
+            loxc::token name = std::get<std::shared_ptr<VarExpr>>(expr)->name;
+            return std::make_shared<RedefExpr>(name, val);
+            }
+        error(equals, "Invalid assignment.");
+        }
+
+    return expr;
+    }
 
 #define MAKE_RULE(name, next, matches)                                  \
     Expr Parser:: name ()                                               \

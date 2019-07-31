@@ -31,9 +31,11 @@ private:
     Stmt variableDeclaration();
     Stmt statement();
     Stmt printStatement();
+    Stmt blockStatement();
     Stmt expressionStatement();
 
     Expr expression();
+    Expr assignment();
     Expr equality();
     Expr comparason();
     Expr addition();

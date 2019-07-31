@@ -11,13 +11,11 @@
  * INTERPRETER
  */
 
-Enviroment op::interpreter::enviroment = Enviroment();
-
 Val op::interpreter::operator()(std::shared_ptr<BinaryExpr> e)
 {
     // note that we are evaluating from left to right.
-    Val left = std::visit(op::interpreter(), e->left);
-    Val right = std::visit(op::interpreter(), e->right);
+    Val left = std::visit(op::interpreter(env), e->left);
+    Val right = std::visit(op::interpreter(env), e->right);
     
     switch (e->op.type)
     {
@@ -67,7 +65,7 @@ Val op::interpreter::operator()(std::shared_ptr<BinaryExpr> e)
 
 Val op::interpreter::operator()(std::shared_ptr<GroupingExpr> e)
 {
-    return std::visit(op::interpreter(), e->expression);
+    return std::visit(op::interpreter(env), e->expression);
 }
 
 Val op::interpreter::operator()(std::shared_ptr<LiteralExpr> e)
@@ -77,7 +75,7 @@ Val op::interpreter::operator()(std::shared_ptr<LiteralExpr> e)
 
 Val op::interpreter::operator()(std::shared_ptr<UnaryExpr> e)
 {
-    Val right = std::visit(op::interpreter(), e->right);
+    Val right = std::visit(op::interpreter(env), e->right);
     switch (e->op.type)
     {
         case loxc::MINUS:
@@ -85,130 +83,62 @@ Val op::interpreter::operator()(std::shared_ptr<UnaryExpr> e)
         case loxc::BANG:
             return !is_truthy(right);
     }
-    // we should never reach this.
+    // We should never reach this.
     throw op::runtime_error(e->op, "Invalid operator in unary expression.");
 }
 
 Val op::interpreter::operator()(std::shared_ptr<VarExpr> e)
 {
-    return enviroment.get(e->name);
+    return env->get(e->name);
+}
+
+Val op::interpreter::operator()(std::shared_ptr<RedefExpr> s)
+{
+    Val value = std::visit(op::interpreter(env), s->value);
+    env->assign(s->name, value);
+    return value;
 }
 
 Val op::interpreter::operator()(std::shared_ptr<PrintStmt> s)
 {
-    Val value = std::visit(interpreter(), s->expression);
+    Val value = std::visit(interpreter(env), s->expression);
     std::cout << value << "\n";
     return std::monostate{};
 }
 
 Val op::interpreter::operator()(std::shared_ptr<ExprStmt> s)
 {
-    return std::visit(interpreter(), s->expression);
+    return std::visit(interpreter(env), s->expression);
 }
 
 Val op::interpreter::operator()(std::shared_ptr<VarStmt> s)
 {
     Val value = std::monostate{};
     if ( ! std::holds_alternative<std::monostate>(s->initializer) )
-        value = std::visit(interpreter(), s->initializer);
+        value = std::visit(interpreter(env), s->initializer);
 
-    enviroment.define(s->name.lexme, value);
+    env->define(s->name.lexme, value);
+
     return value;
+}
+
+Val op::interpreter::operator()(std::shared_ptr<BlockStmt> s)
+{
+    auto block_env = std::make_shared<Enviroment>();
+    block_env->parent = env;
+    
+    Val last;
+
+    for (const auto& stmt : s->stmt_list)
+        {
+        last = std::visit(interpreter(block_env), stmt);
+        }
+
+    return last;
 }
 
 Val op::interpreter::operator()(std::monostate m)
 {
     return m;
-}
-
-/**
- * AST PRINTER
- */
-std::string op::ast_printer::operator()(std::shared_ptr<BinaryExpr> e)
-{
-    return parenthesize(e->op.lexme, {e->left, e->right});
-}
-
-std::string op::ast_printer::operator()(std::shared_ptr<GroupingExpr> e)
-{
-    return parenthesize("grouping", {e->expression});
-}
-
-std::string op::ast_printer::operator()(std::shared_ptr<LiteralExpr> e)
-{
-    std::stringstream ss;
-    ss << e->value;
-    return parenthesize(ss.str(), {});
-}
-
-std::string op::ast_printer::operator()(std::shared_ptr<UnaryExpr> e)
-{
-    return parenthesize(e->op.lexme, {e->right});
-}
-
-std::string op::ast_printer::operator()(std::shared_ptr<VarExpr> e)
-{
-    return parenthesize(e->name.lexme, {});
-}
-
-std::string op::ast_printer::operator()(std::monostate)
-{
-    return "<uninitialized>";
-}
-
-std::string op::ast_printer::parenthesize(std::string name, std::initializer_list<Expr> in)
-{
-    std::stringstream builder;
-    builder << "(" << name;
-    for (const auto &e : in)
-        builder << " " << std::visit(ast_printer(), e);
-    builder << ")";
-    return builder.str();
-};
-
-/**
- * RST PRINTER
- */
-std::string op::rps_printer::operator()(std::shared_ptr<BinaryExpr> e)
-{
-    return reverse_polish(e->op.lexme, {e->left, e->right});
-}
-
-std::string op::rps_printer::operator()(std::shared_ptr<GroupingExpr> e)
-{
-    return reverse_polish("", {e->expression});
-}
-
-std::string op::rps_printer::operator()(std::shared_ptr<LiteralExpr> e)
-{
-    std::stringstream ss;
-    ss << e->value;
-    return reverse_polish(ss.str(), {});
-}
-
-std::string op::rps_printer::operator()(std::shared_ptr<UnaryExpr> e)
-{
-    return reverse_polish(e->op.lexme, {e->right});
-}
-
-std::string op::rps_printer::operator()(std::shared_ptr<VarExpr> e)
-{
-    return reverse_polish(e->name.lexme, {});
-}
-
-std::string op::rps_printer::operator()(std::monostate)
-{
-    return "<uninitialized>";
-}
-
-std::string op::rps_printer::reverse_polish(std::string name, std::initializer_list<Expr> in)
-{
-    std::stringstream builder;
-    for (const auto& e : in)
-    {
-        builder << std::visit(rps_printer(), e) << " ";
-    }
-    builder << name;
-    return builder.str();
 }
 

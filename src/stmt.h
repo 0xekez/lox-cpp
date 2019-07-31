@@ -13,13 +13,15 @@
 
 #include <memory> // std::shared_ptr
 #include <variant>
+#include <vector>
 #include "expr.h"
 
 using Stmt = std::variant<
 	std::monostate,
 	std::shared_ptr<struct PrintStmt>,
 	std::shared_ptr<struct ExprStmt>,
-	std::shared_ptr<struct VarStmt>>;
+	std::shared_ptr<struct VarStmt>,
+	std::shared_ptr<struct BlockStmt> >;
 
 struct PrintStmt
 {
@@ -44,6 +46,14 @@ struct VarStmt
 
 	VarStmt (loxc::token name_in, Expr initializer_in)
 		: name(std::move(name_in)), initializer(std::move(initializer_in)) {}
+};
+
+struct BlockStmt
+{
+	std::vector<Stmt> stmt_list;
+
+	BlockStmt (std::vector<Stmt> stmt_list_in)
+		: stmt_list(std::move(stmt_list_in)) {}
 };
 
 #endif

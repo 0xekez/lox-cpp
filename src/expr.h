@@ -22,7 +22,8 @@ using Expr = std::variant<
 	std::shared_ptr<struct GroupingExpr>,
 	std::shared_ptr<struct LiteralExpr>,
 	std::shared_ptr<struct UnaryExpr>,
-	std::shared_ptr<struct VarExpr>>;
+	std::shared_ptr<struct VarExpr>,
+	std::shared_ptr<struct RedefExpr> >;
 
 struct BinaryExpr
 {
@@ -65,6 +66,15 @@ struct VarExpr
 
 	VarExpr (loxc::token name_in)
 		: name(std::move(name_in)) {}
+};
+
+struct RedefExpr
+{
+	loxc::token name;
+	Expr value;
+
+	RedefExpr (loxc::token name_in, Expr value_in)
+		: name(std::move(name_in)), value(std::move(value_in)) {}
 };
 
 #endif

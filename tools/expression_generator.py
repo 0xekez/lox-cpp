@@ -46,7 +46,7 @@ def make_expr (class_name, rest):
 def make_expr_using_declaration (names):
     out = "using Expr = std::variant<\n\tstd::monostate,\n\t"
     out += ",\n\t".join(["std::shared_ptr<struct {}>".format(name) for name in names])
-    out += ">;\n\n"
+    out += " >;\n\n"
     return out
 
 def main ():

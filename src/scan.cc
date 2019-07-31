@@ -19,7 +19,7 @@ std::optional<std::vector<loxc::token>> Scanner::run(std::string src)
   current = start = source.begin();
   stop = source.end();
 
-  line = 0;
+  line = 1;
 
   while (have_next())
   {

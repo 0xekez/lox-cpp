@@ -36,7 +36,7 @@ public:
   static void error(loxc::token tok, std::string what)
   {
     if (tok.type == loxc::END)
-      Reporter::error("[Error] at EOF, line " + std::to_string(tok.line) + ":  " + what);
+      Reporter::error("at EOF, line " + std::to_string(tok.line) + ":  " + what);
     else
       Reporter::error(what, tok.lexme, tok.line);
   }
