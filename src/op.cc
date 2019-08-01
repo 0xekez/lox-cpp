@@ -126,6 +126,7 @@ Val op::interpreter::operator()(std::shared_ptr<BlockStmt> s)
 {
     auto block_env = std::make_shared<Enviroment>();
     block_env->parent = env;
+    block_env->print();
     
     Val last;
 

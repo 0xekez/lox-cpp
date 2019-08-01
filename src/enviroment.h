@@ -31,10 +31,20 @@ public:
         // We let variables be reassigned.
         // This is a design choice that I'm not actually sure I like.
         val_map.insert_or_assign(std::move(name), std::move(value));
-
-        // for (const auto& item : val_map)
-        //     std::cout << item.first << " -> " << item.second << "\n";
     }
+
+    void print (std::string starter = "")
+        {
+        std::cout << starter + "enviroment:\n";
+        for (const auto& item : val_map)
+            std::cout << "\t" + starter << item.first << " -> " << item.second << "\n";
+
+        if (parent)
+            {
+            std::cout << starter + "\t" + "parent\n";
+            parent->print("\t" + starter);
+            }
+        }
 
     void assign (const loxc::token& name, Val value)
     {
@@ -46,11 +56,14 @@ public:
 
     Val get (const loxc::token& name)
     {
+        print();
+        std::cout << "finding: " << name.lexme << "\n";
         auto where = val_map.find(name.lexme);
         if (where == val_map.end())
             {
             if ( ! parent )
                 throw op::runtime_error(name, "Undefined variable '" + name.lexme + "'.");
+            std::cout << "asking parent\n";
             return parent->get(name);
             }
         return where->second;

@@ -28,7 +28,7 @@ struct interpreter
     std::shared_ptr<Enviroment> env;
 
     interpreter(std::shared_ptr<Enviroment> parent_in)
-    : env(std::move(parent_in))
+    : env(parent_in)
     {}
 
     DECLARE_EXPR_VISITOR(Val)
