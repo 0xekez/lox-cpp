@@ -2,6 +2,15 @@
 lox-cpp
 =======
 
-A WIP Lox implementation following along with
-Crafting Interpreters. See hello.loxc for what
-is currently supported.
+A WIP Lox implementation following along with Crafting Interpreters.
+See hello.loxc for what is currently supported.
+
+This branch records something I was thinking about where everything is
+a statement. Statements just return the last value that they
+evaluated. For example:
+
+print if (true;) "dog"; else "cat";;      // prints dog
+
+I think it introduces some flexibility, but I also figure its best to
+start with something normal before branching out into strange
+territory. I'll think about revisiting this later.
