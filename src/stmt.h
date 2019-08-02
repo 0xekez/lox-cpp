@@ -18,11 +18,12 @@
 
 using Stmt = std::variant<
 	std::monostate,
-	std::unique_ptr<struct PrintStmt>,
-	std::unique_ptr<struct ExprStmt>,
-	std::unique_ptr<struct VarStmt>,
-	std::unique_ptr<struct BlockStmt>,
-	std::unique_ptr<struct IfStmt> >;
+	std::shared_ptr<struct PrintStmt>,
+	std::shared_ptr<struct ExprStmt>,
+	std::shared_ptr<struct VarStmt>,
+	std::shared_ptr<struct BlockStmt>,
+	std::shared_ptr<struct IfStmt>,
+	std::shared_ptr<struct WhileStmt> >;
 
 struct PrintStmt
 {
@@ -65,6 +66,15 @@ struct IfStmt
 
 	IfStmt (Expr condition_in, Stmt t_branch_in, Stmt f_branch_in)
 		: condition(std::move(condition_in)), t_branch(std::move(t_branch_in)), f_branch(std::move(f_branch_in)) {}
+};
+
+struct WhileStmt
+{
+	Expr condition;
+	Stmt body;
+
+	WhileStmt (Expr condition_in, Stmt body_in)
+		: condition(std::move(condition_in)), body(std::move(body_in)) {}
 };
 
 #endif

@@ -33,6 +33,8 @@ private:
     Stmt printStatement();
     Stmt blockStatement();
     Stmt ifStatement();
+    Stmt whileStatement();
+    Stmt forStatement();
     Stmt expressionStatement();
 
     Expr expression();

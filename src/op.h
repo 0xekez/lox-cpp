@@ -34,11 +34,17 @@ struct interpreter
 
     DECLARE_EXPR_VISITOR(Val)
 
-    Val operator()(std::unique_ptr<PrintStmt> s);
-    Val operator()(std::unique_ptr<ExprStmt> s);
-    Val operator()(std::unique_ptr<VarStmt> s);
-    Val operator()(std::unique_ptr<BlockStmt> s);
-    Val operator()(std::unique_ptr<IfStmt> s);
+    // TODO(zeke): Evaluating a statement in lox currently returns the last
+    // value that was evaluated in the statement. At present this is not
+    // accessible from the sripting layer, but I keep doing it as I think 
+    // that the idea that an if/while/print/... statement could return a val
+    // could prove to be quite powerful.
+    Val operator()(std::shared_ptr<PrintStmt> s);
+    Val operator()(std::shared_ptr<ExprStmt> s);
+    Val operator()(std::shared_ptr<VarStmt> s);
+    Val operator()(std::shared_ptr<BlockStmt> s);
+    Val operator()(std::shared_ptr<IfStmt> s);
+    Val operator()(std::shared_ptr<WhileStmt> s);
         
     inline void assert_numeric(loxc::token op, const Val& v1, const Val& v2)
     {

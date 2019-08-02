@@ -47,7 +47,7 @@ def make_stmt (class_name, rest):
 
 def make_expr_using_declaration (names):
     out = "using Stmt = std::variant<\n\tstd::monostate,\n\t"
-    out += ",\n\t".join(["std::unique_ptr<struct {}>".format(name) for name in names])
+    out += ",\n\t".join(["std::shared_ptr<struct {}>".format(name) for name in names])
     out += " >;\n\n"
     return out
 

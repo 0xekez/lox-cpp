@@ -111,52 +111,64 @@ Val op::interpreter::operator()(std::shared_ptr<LogicExpr> e)
     return std::visit(op::interpreter(env), e->right);
 }
 
-Val op::interpreter::operator()(std::unique_ptr<PrintStmt> s)
+Val op::interpreter::operator()(std::shared_ptr<PrintStmt> s)
 {
     Val value = std::visit(interpreter(env), s->expression);
     std::cout << value << "\n";
     return std::monostate{};
 }
 
-Val op::interpreter::operator()(std::unique_ptr<ExprStmt> s)
+Val op::interpreter::operator()(std::shared_ptr<ExprStmt> s)
 {
     return std::visit(interpreter(env), s->expression);
 }
 
-Val op::interpreter::operator()(std::unique_ptr<VarStmt> s)
+Val op::interpreter::operator()(std::shared_ptr<VarStmt> s)
 {
     Val value = std::monostate{};
     if ( ! std::holds_alternative<std::monostate>(s->initializer) )
         value = std::visit(interpreter(env), s->initializer);
     // Throw runtime error here if we want to require variables to have
-    // initializers.
+    // initializers?
 
     env->define(s->name.lexme, value);
 
     return value;
 }
 
-Val op::interpreter::operator()(std::unique_ptr<BlockStmt> s)
+Val op::interpreter::operator()(std::shared_ptr<BlockStmt> s)
 {
     auto block_env = std::make_shared<Enviroment>();
     block_env->parent = env;
     
-    Val last;
+    Val last(std::monostate{});
 
     for (Stmt& stmt : s->stmt_list)
-        last = std::visit(interpreter(block_env), std::move(stmt));
+        last = std::visit(interpreter(block_env), stmt);
 
     return last;
 }
 
-Val op::interpreter::operator()(std::unique_ptr<IfStmt> s)
+Val op::interpreter::operator()(std::shared_ptr<IfStmt> s)
 {
-    if ( is_truthy(std::visit(interpreter(env), std::move(s->condition))) )
-        return std::visit(interpreter(env), std::move(s->t_branch));
+    if ( is_truthy(std::visit(interpreter(env), s->condition)) )
+        return std::visit(interpreter(env), s->t_branch);
     else if ( ! std::holds_alternative<std::monostate>(s->f_branch) )
-        return std::visit(interpreter(env), std::move(s->f_branch));
+        return std::visit(interpreter(env), s->f_branch);
 
     return std::monostate{};
+}
+
+Val op::interpreter::operator()(std::shared_ptr<WhileStmt> s)
+{
+    Val ret(std::monostate{});
+
+    while ( is_truthy(std::visit(interpreter(env), s->condition)) )
+        {
+            ret = std::visit(interpreter(env), s->body);
+        }
+
+    return ret;
 }
 
 Val op::interpreter::operator()(std::monostate m)

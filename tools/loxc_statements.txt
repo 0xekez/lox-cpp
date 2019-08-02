@@ -5,3 +5,5 @@ ExprStmt    : Expr expression
 VarStmt     : loxc::token name, Expr initializer
 BlockStmt   : std::vector<Stmt> stmt_list
 IfStmt      : Expr condition, Stmt t_branch, Stmt f_branch
+WhileStmt   : Expr condition, Stmt body
+

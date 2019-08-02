@@ -1,0 +1,8 @@
+var annalise = "I ";
+
+for (var i = 0; i < 3; i = i + 1)
+{
+    annalise = annalise + "like ";
+}
+
+print annalise + "Annalise <3";

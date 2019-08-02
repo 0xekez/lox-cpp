@@ -1,6 +1,8 @@
 #include <string>
 #include <memory>
 #include <optional>
+#include <initializer_list>
+#include <vector>
 
 #include "parse.h"
 #include "token_type.h"
@@ -48,7 +50,7 @@ Stmt Parser::variableDeclaration()
         init = expression();
 
     consume(loxc::SEMICOLON, "Expected a semicolon after variable declaration");
-    return std::make_unique<VarStmt>(std::move(name), std::move(init));
+    return std::make_shared<VarStmt>(std::move(name), std::move(init));
 }
 
 Stmt Parser::statement()
@@ -56,6 +58,8 @@ Stmt Parser::statement()
     if (match(loxc::PRINT)) return printStatement();
     if (match(loxc::LEFT_BRACE)) return blockStatement();
     if (match(loxc::IF)) return ifStatement();
+    if (match(loxc::WHILE)) return whileStatement();
+    if (match(loxc::FOR)) return forStatement();
 
     return expressionStatement();
 }
@@ -64,7 +68,7 @@ Stmt Parser::printStatement()
 {
     Expr value = expression();
     consume(loxc::SEMICOLON, "Expected ; after print statment.");
-    return std::make_unique<PrintStmt>(std::move(value));
+    return std::make_shared<PrintStmt>(std::move(value));
 }
 
 Stmt Parser::blockStatement()
@@ -75,7 +79,7 @@ Stmt Parser::blockStatement()
         stmt_list.push_back(declaration());
     
     consume(loxc::RIGHT_BRACE, "Expected a closing bracket.");
-    return std::make_unique<BlockStmt>(std::move(stmt_list));
+    return std::make_shared<BlockStmt>(std::move(stmt_list));
 }
 
 Stmt Parser::ifStatement()
@@ -89,14 +93,76 @@ Stmt Parser::ifStatement()
     if (match(loxc::ELSE))
         otherwise = statement();
 
-    return std::make_unique<IfStmt>(conditional, std::move(then), std::move(otherwise));
+    return std::make_shared<IfStmt>(conditional, std::move(then), std::move(otherwise));
+}
+
+Stmt Parser::whileStatement()
+{
+    consume(loxc::LEFT_PAREN, "Expected '(' after while.");
+    Expr condition = expression();
+    consume(loxc::RIGHT_PAREN, "Expected closing ')' after while.");
+
+    Stmt body = statement();
+
+    return std::make_shared<WhileStmt>(condition, body);
+
+}
+
+// for (initializer ; condition ; increment) body
+Stmt Parser::forStatement()
+{
+    consume(loxc::LEFT_PAREN, "Expected '(' after for.");
+
+    Stmt initializer;
+    // Initializer is already monostate. I think this is more
+    // clear / doccuments intent better.
+    if (match(loxc::SEMICOLON))
+        initializer = std::monostate{};
+    else if (match(loxc::VAR))
+        initializer = variableDeclaration();
+    else
+        initializer = expressionStatement();
+
+    Expr condition(std::monostate{});
+    if ( ! check(loxc::SEMICOLON) )
+        condition = expression();
+
+    consume(loxc::SEMICOLON, "Expected ';' after for loop condition.");
+
+    Expr increment(std::monostate{});
+    if ( ! check(loxc::RIGHT_PAREN) )
+        increment = expression();
+
+    consume(loxc::RIGHT_PAREN, "Expected ')' after for.");
+    Stmt body = statement();
+
+    // A for loop is just sugar for a while loop. Here we build the
+    // while loop syntax tree.
+    if ( ! std::holds_alternative<std::monostate>(increment) )
+        body = std::make_shared<BlockStmt>(
+            std::vector<Stmt>({body, std::make_shared<ExprStmt>(increment)})
+            );
+    
+    // A null condition is always true
+    if ( std::holds_alternative<std::monostate>(condition) )
+        condition = std::make_shared<LiteralExpr>(true);
+
+    body = std::make_shared<WhileStmt>(condition, body);
+
+    if ( ! std::holds_alternative<std::monostate>(initializer) )
+        body = std::make_shared<BlockStmt>(
+            std::vector<Stmt>({initializer, body})
+            );
+
+    // done :)
+    return body;
 }
 
 Stmt Parser::expressionStatement()
 {
     Expr expr = expression();
     consume(loxc::SEMICOLON, "Expected ; after expression statment.");
-    return std::make_unique<ExprStmt>(std::move(expr));
+    return std::make_shared<ExprStmt>(std::move(expr));
 }
 
 Expr Parser::expression()
@@ -194,7 +260,7 @@ Expr Parser::primary()
     if (match(loxc::TRUE))
         return std::make_shared<LiteralExpr>(true);
     if (match(loxc::NIL))
-        return std::make_shared<LiteralExpr>(nullptr);
+        return std::make_shared<LiteralExpr>(std::monostate{});
 
     if (match(loxc::NUMBER, loxc::STRING))
     {
