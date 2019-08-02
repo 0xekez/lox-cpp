@@ -18,6 +18,8 @@ return_type operator()(std::shared_ptr<LiteralExpr> e);     \
 return_type operator()(std::shared_ptr<UnaryExpr> e);       \
 return_type operator()(std::shared_ptr<VarExpr> e);         \
 return_type operator()(std::shared_ptr<RedefExpr> e);       \
+return_type operator()(std::shared_ptr<LogicExpr> e);       \
+return_type operator()(std::shared_ptr<StmtExpr> e);        \
 return_type operator()(std::monostate);                     \
 
 namespace op
@@ -33,10 +35,11 @@ struct interpreter
 
     DECLARE_EXPR_VISITOR(Val)
 
-    Val operator()(std::shared_ptr<PrintStmt> s);
-    Val operator()(std::shared_ptr<ExprStmt> s);
-    Val operator()(std::shared_ptr<VarStmt> s);
-    Val operator()(std::shared_ptr<BlockStmt> s);
+    Val operator()(std::unique_ptr<PrintStmt> s);
+    Val operator()(std::unique_ptr<ExprStmt> s);
+    Val operator()(std::unique_ptr<VarStmt> s);
+    Val operator()(std::unique_ptr<BlockStmt> s);
+    Val operator()(std::unique_ptr<IfStmt> s);
         
     inline void assert_numeric(loxc::token op, const Val& v1, const Val& v2)
     {

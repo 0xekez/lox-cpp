@@ -50,20 +50,22 @@ public:
     {
         auto where = val_map.find(name.lexme);
         if (where == val_map.end())
-            throw op::runtime_error(name, "Undefined variable '" + name.lexme + "'.");
+        {
+            if ( ! parent)
+                throw op::runtime_error(name, "Undefined variable '" + name.lexme + "'.");
+            parent->assign(name, value);
+            return;
+        }
         where->second = value;
     }
 
     Val get (const loxc::token& name)
     {
-        print();
-        std::cout << "finding: " << name.lexme << "\n";
         auto where = val_map.find(name.lexme);
         if (where == val_map.end())
             {
             if ( ! parent )
                 throw op::runtime_error(name, "Undefined variable '" + name.lexme + "'.");
-            std::cout << "asking parent\n";
             return parent->get(name);
             }
         return where->second;

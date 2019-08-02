@@ -11,13 +11,6 @@ string(TOUPPER ${CMAKE_BUILD_TYPE} build_affix)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-add_custom_target(
- stmt ALL
- COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/stmt_generator.py && ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/expression_generator.py
- BYPRODUCTS src/stmt.h src/expr.h
- COMMENT "Doing autogeneration."
-)
-
 add_executable(loxc src/main.cc src/scan.cc src/token.cc src/val.cc src/op.cc src/parse.cc)
 
 set(summary

@@ -20,6 +20,7 @@ def make_init ():
         '#include <variant>',
         '#include "token.h"',
         '#include "val.h"',
+        '#include "stmt.h"',
     )) + "\n\n"
 
 def make_expr (class_name, rest):

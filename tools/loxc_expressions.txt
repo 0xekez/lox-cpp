@@ -20,3 +20,9 @@ VarExpr      : loxc::token name
 
 # Redefinition of a variable.
 RedefExpr    : loxc::token name, Expr value
+
+# Logical and and or
+LogicExpr    : Expr left, loxc::token op, Expr right
+
+# A statement that evaluates to a value
+StmtExpr     : Stmt body

@@ -83,9 +83,9 @@ int run(std::string in)
 
   try
   {
-    std::for_each(expr.value().begin(), expr.value().end(), [](Stmt s) {
+    std::for_each(expr.value().begin(), expr.value().end(), [](Stmt& s) {
       // The parent of the top level interpreter is the global variables.
-      Val val = std::visit(op::interpreter(global_env), s);
+      Val val = std::visit(op::interpreter(global_env), std::move(s));
       });
   }
   catch(const op::runtime_error& e)

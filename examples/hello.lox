@@ -1,0 +1,28 @@
+// here are some things lox-cpp can do right now
+
+print "Some loxc tests:";
+print 1 + 1;
+print "^---> 2";
+var a = (2 * (3 / 5)) + 4;
+print a + 4;
+print "^---> 9.2";
+
+var deep = "deep";
+
+{
+    a = a + 1;
+    var a = 11;
+    {
+        print a;
+        print "^---> 11";
+        var a = "dog";
+        {{{{{{{{{{{{{{{{{{{{{{ print deep; print "^---> deep"; }}}}}}}}}}}}}}}}}}}}}}
+        print a;
+        print "^---> dog";
+    }
+    print a;
+    print "^---> 11";
+}
+
+print a;
+print "^---> 6.2";

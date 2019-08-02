@@ -45,25 +45,26 @@ Stmt Parser::variableDeclaration()
 
     Expr init = std::monostate{};
     if (match(loxc::EQUAL))
-        init = expression();
+        init = statement_expression();
 
     consume(loxc::SEMICOLON, "Expected a semicolon after variable declaration");
-    return std::make_shared<VarStmt>(std::move(name), std::move(init));
+    return std::make_unique<VarStmt>(std::move(name), std::move(init));
 }
 
 Stmt Parser::statement()
 {
     if (match(loxc::PRINT)) return printStatement();
     if (match(loxc::LEFT_BRACE)) return blockStatement();
+    if (match(loxc::IF)) return ifStatement();
 
     return expressionStatement();
 }
 
 Stmt Parser::printStatement()
 {
-    Expr value = expression();
+    Expr value = statement_expression();
     consume(loxc::SEMICOLON, "Expected ; after print statment.");
-    return std::make_shared<PrintStmt>(std::move(value));
+    return std::make_unique<PrintStmt>(std::move(value));
 }
 
 Stmt Parser::blockStatement()
@@ -74,14 +75,34 @@ Stmt Parser::blockStatement()
         stmt_list.push_back(declaration());
     
     consume(loxc::RIGHT_BRACE, "Expected a closing bracket.");
-    return std::make_shared<BlockStmt>(std::move(stmt_list));
+    return std::make_unique<BlockStmt>(std::move(stmt_list));
+}
+
+Stmt Parser::ifStatement()
+{
+    consume(loxc::LEFT_PAREN, "Expected '(' after if.");
+    Expr conditional = statement_expression();
+    consume(loxc::RIGHT_PAREN, "Expected closing ')' after if.");
+    Stmt then = statement();
+
+    Stmt otherwise; // std::monostate
+    if (match(loxc::ELSE))
+        otherwise = statement();
+
+    return std::make_unique<IfStmt>(conditional, std::move(then), std::move(otherwise));
 }
 
 Stmt Parser::expressionStatement()
 {
     Expr expr = expression();
     consume(loxc::SEMICOLON, "Expected ; after expression statment.");
-    return std::make_shared<ExprStmt>(std::move(expr));
+    return std::make_unique<ExprStmt>(std::move(expr));
+}
+
+Expr Parser::statement_expression()
+{
+    Stmt body = statement();
+    return std::make_shared<StmtExpr>(std::move(body));
 }
 
 Expr Parser::expression()
@@ -91,7 +112,8 @@ Expr Parser::expression()
 
 Expr Parser::assignment()
     {
-    Expr expr = equality();
+    // or -> and -> equality
+    Expr expr = logical_or();
 
     if(match(loxc::EQUAL))
         {
@@ -108,6 +130,36 @@ Expr Parser::assignment()
 
     return expr;
     }
+
+Expr Parser::logical_or()
+{
+    Expr left = logical_and();
+
+    while (match(loxc::OR))
+    {
+        loxc::token op = previous();
+        Expr right = logical_and();
+        left = std::make_shared<LogicExpr>
+            (std::move(left), std::move(op), std::move(right));
+    }
+
+    return left;
+}
+
+Expr Parser::logical_and()
+{
+    Expr left = equality();
+
+    while (match(loxc::AND))
+    {
+        loxc::token op = previous();
+        Expr right = equality();
+        left = std::make_shared<LogicExpr>
+            (std::move(left), std::move(op), std::move(right));
+    }
+
+    return left;
+}
 
 #define MAKE_RULE(name, next, matches)                                  \
     Expr Parser:: name ()                                               \
@@ -160,7 +212,7 @@ Expr Parser::primary()
 
     if (match(loxc::LEFT_PAREN))
     {
-        Expr expr = expression();
+        Expr expr = statement_expression();
         consume(loxc::RIGHT_PAREN, "Expected ')' after expression.");
         return std::make_shared<GroupingExpr>(expr);
     }

@@ -92,50 +92,76 @@ Val op::interpreter::operator()(std::shared_ptr<VarExpr> e)
     return env->get(e->name);
 }
 
-Val op::interpreter::operator()(std::shared_ptr<RedefExpr> s)
+Val op::interpreter::operator()(std::shared_ptr<RedefExpr> e)
 {
-    Val value = std::visit(op::interpreter(env), s->value);
-    env->assign(s->name, value);
+    Val value = std::visit(op::interpreter(env), e->value);
+    env->assign(e->name, value);
     return value;
 }
 
-Val op::interpreter::operator()(std::shared_ptr<PrintStmt> s)
+Val op::interpreter::operator()(std::shared_ptr<LogicExpr> e)
+{
+    Val left = std::visit(op::interpreter(env), e->left);
+    if (e->op.type == loxc::OR)
+        if (is_truthy(left))
+            return left;
+    if (e->op.type == loxc::AND)
+        if ( ! is_truthy(left) )
+            return left;
+    return std::visit(op::interpreter(env), e->right);
+}
+
+Val op::interpreter::operator()(std::shared_ptr<StmtExpr> e)
+{
+    return std::visit(op::interpreter(env), std::move(e->body));
+}
+
+Val op::interpreter::operator()(std::unique_ptr<PrintStmt> s)
 {
     Val value = std::visit(interpreter(env), s->expression);
     std::cout << value << "\n";
     return std::monostate{};
 }
 
-Val op::interpreter::operator()(std::shared_ptr<ExprStmt> s)
+Val op::interpreter::operator()(std::unique_ptr<ExprStmt> s)
 {
     return std::visit(interpreter(env), s->expression);
 }
 
-Val op::interpreter::operator()(std::shared_ptr<VarStmt> s)
+Val op::interpreter::operator()(std::unique_ptr<VarStmt> s)
 {
     Val value = std::monostate{};
     if ( ! std::holds_alternative<std::monostate>(s->initializer) )
         value = std::visit(interpreter(env), s->initializer);
+    // Throw runtime error here if we want to require variables to have
+    // initializers.
 
     env->define(s->name.lexme, value);
 
     return value;
 }
 
-Val op::interpreter::operator()(std::shared_ptr<BlockStmt> s)
+Val op::interpreter::operator()(std::unique_ptr<BlockStmt> s)
 {
     auto block_env = std::make_shared<Enviroment>();
     block_env->parent = env;
-    block_env->print();
     
     Val last;
 
-    for (const auto& stmt : s->stmt_list)
-        {
-        last = std::visit(interpreter(block_env), stmt);
-        }
+    for (Stmt& stmt : s->stmt_list)
+        last = std::visit(interpreter(block_env), std::move(stmt));
 
     return last;
+}
+
+Val op::interpreter::operator()(std::unique_ptr<IfStmt> s)
+{
+    if ( is_truthy(std::visit(interpreter(env), std::move(s->condition))) )
+        return std::visit(interpreter(env), std::move(s->t_branch));
+    else if ( ! std::holds_alternative<std::monostate>(s->f_branch) )
+        return std::visit(interpreter(env), std::move(s->f_branch));
+
+    return std::monostate{};
 }
 
 Val op::interpreter::operator()(std::monostate m)
