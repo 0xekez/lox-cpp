@@ -111,11 +111,6 @@ Val op::interpreter::operator()(std::shared_ptr<LogicExpr> e)
     return std::visit(op::interpreter(env), e->right);
 }
 
-Val op::interpreter::operator()(std::shared_ptr<StmtExpr> e)
-{
-    return std::visit(op::interpreter(env), std::move(e->body));
-}
-
 Val op::interpreter::operator()(std::unique_ptr<PrintStmt> s)
 {
     Val value = std::visit(interpreter(env), s->expression);

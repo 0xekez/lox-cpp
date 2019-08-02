@@ -16,14 +16,6 @@
 #include "token.h"
 #include "val.h"
 
-using Stmt = std::variant<
-	std::monostate,
-	std::unique_ptr<struct PrintStmt>,
-	std::unique_ptr<struct ExprStmt>,
-	std::unique_ptr<struct VarStmt>,
-	std::unique_ptr<struct BlockStmt>,
-	std::unique_ptr<struct IfStmt> >;
-
 using Expr = std::variant<
 	std::monostate,
 	std::shared_ptr<struct BinaryExpr>,
@@ -32,8 +24,7 @@ using Expr = std::variant<
 	std::shared_ptr<struct UnaryExpr>,
 	std::shared_ptr<struct VarExpr>,
 	std::shared_ptr<struct RedefExpr>,
-	std::shared_ptr<struct LogicExpr>,
-	std::shared_ptr<struct StmtExpr> >;
+	std::shared_ptr<struct LogicExpr> >;
 
 struct BinaryExpr
 {
@@ -95,14 +86,6 @@ struct LogicExpr
 
 	LogicExpr (Expr left_in, loxc::token op_in, Expr right_in)
 		: left(std::move(left_in)), op(std::move(op_in)), right(std::move(right_in)) {}
-};
-
-struct StmtExpr
-{
-	Stmt body;
-
-	StmtExpr (Stmt body_in)
-		: body(std::move(body_in)) {}
 };
 
 #endif

@@ -19,7 +19,6 @@ return_type operator()(std::shared_ptr<UnaryExpr> e);       \
 return_type operator()(std::shared_ptr<VarExpr> e);         \
 return_type operator()(std::shared_ptr<RedefExpr> e);       \
 return_type operator()(std::shared_ptr<LogicExpr> e);       \
-return_type operator()(std::shared_ptr<StmtExpr> e);        \
 return_type operator()(std::monostate);                     \
 
 namespace op

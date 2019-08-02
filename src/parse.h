@@ -35,7 +35,6 @@ private:
     Stmt ifStatement();
     Stmt expressionStatement();
 
-    Expr statement_expression();
     Expr expression();
     Expr logical_or();
     Expr logical_and();

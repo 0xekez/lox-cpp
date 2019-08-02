@@ -1,0 +1,26 @@
+
+print false and true;
+print "^---0";
+
+print false or true;
+print "^---1";
+
+print "dog" or false;
+print "^---dog";
+
+// and yields the last item that is true
+print "dog" and "cat";
+print "^---cat";
+
+// or yields the last item that is true
+print "dog" or "cat";
+print "^---dog";
+
+var a = 5;
+
+// or is lazy
+print true or a = 10;
+print "^---1";
+print a;
+print "^---5";
+

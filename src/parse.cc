@@ -45,7 +45,7 @@ Stmt Parser::variableDeclaration()
 
     Expr init = std::monostate{};
     if (match(loxc::EQUAL))
-        init = statement_expression();
+        init = expression();
 
     consume(loxc::SEMICOLON, "Expected a semicolon after variable declaration");
     return std::make_unique<VarStmt>(std::move(name), std::move(init));
@@ -62,7 +62,7 @@ Stmt Parser::statement()
 
 Stmt Parser::printStatement()
 {
-    Expr value = statement_expression();
+    Expr value = expression();
     consume(loxc::SEMICOLON, "Expected ; after print statment.");
     return std::make_unique<PrintStmt>(std::move(value));
 }
@@ -81,7 +81,7 @@ Stmt Parser::blockStatement()
 Stmt Parser::ifStatement()
 {
     consume(loxc::LEFT_PAREN, "Expected '(' after if.");
-    Expr conditional = statement_expression();
+    Expr conditional = expression();
     consume(loxc::RIGHT_PAREN, "Expected closing ')' after if.");
     Stmt then = statement();
 
@@ -97,12 +97,6 @@ Stmt Parser::expressionStatement()
     Expr expr = expression();
     consume(loxc::SEMICOLON, "Expected ; after expression statment.");
     return std::make_unique<ExprStmt>(std::move(expr));
-}
-
-Expr Parser::statement_expression()
-{
-    Stmt body = statement();
-    return std::make_shared<StmtExpr>(std::move(body));
 }
 
 Expr Parser::expression()
@@ -212,7 +206,7 @@ Expr Parser::primary()
 
     if (match(loxc::LEFT_PAREN))
     {
-        Expr expr = statement_expression();
+        Expr expr = expression();
         consume(loxc::RIGHT_PAREN, "Expected ')' after expression.");
         return std::make_shared<GroupingExpr>(expr);
     }
