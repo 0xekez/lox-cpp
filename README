@@ -2,6 +2,5 @@
 lox-cpp
 =======
 
-A WIP Lox implementation following along with
-Crafting Interpreters. See hello.loxc for what
-is currently supported.
+A WIP Lox implementation following along with Crafting Interpreters.
+See examples/ for what is currently supported and some examples.
