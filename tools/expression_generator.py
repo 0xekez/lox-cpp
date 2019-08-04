@@ -18,9 +18,9 @@ def make_init ():
         description,
         '#include <memory> // std::shared_ptr',
         '#include <variant>',
+        '#include <vector>',
         '#include "token.h"',
         '#include "val.h"',
-        '#include "stmt.h"',
     )) + "\n\n"
 
 def make_expr (class_name, rest):

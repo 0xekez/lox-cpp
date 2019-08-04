@@ -3,6 +3,7 @@
 #include <string>
 
 #include "val.h"
+#include "callable.h"
 
 std::ostream &operator<<(std::ostream &o, const Val& v)
 {
@@ -16,6 +17,8 @@ std::ostream &operator<<(std::ostream &o, const Val& v)
             o << std::get<std::string>(v); break;
         case 3:
             o << std::get<bool>(v); break;
+        case 4:
+            o << std::get<std::shared_ptr<loxc::callable>>(v)->str; break;
     }
 
     return o;

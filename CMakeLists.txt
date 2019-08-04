@@ -5,7 +5,7 @@ set (CMAKE_CXX_STANDARD 17)
 find_package( PythonInterp 3 REQUIRED )
 
 set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_FLAGS "-Wall -Wno-switch")
+set(CMAKE_CXX_FLAGS "-Wall -Wno-switch -O3")
 
 string(TOUPPER ${CMAKE_BUILD_TYPE} build_affix)
 

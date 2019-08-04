@@ -23,3 +23,6 @@ RedefExpr    : loxc::token name, Expr value
 
 # Logical and and or
 LogicExpr    : Expr left, loxc::token op, Expr right
+
+# Functions!
+CallExpr     : Expr callee, loxc::token closing_paren, std::vector<Expr> args

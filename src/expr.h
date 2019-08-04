@@ -13,6 +13,7 @@
 
 #include <memory> // std::shared_ptr
 #include <variant>
+#include <vector>
 #include "token.h"
 #include "val.h"
 
@@ -24,7 +25,8 @@ using Expr = std::variant<
 	std::shared_ptr<struct UnaryExpr>,
 	std::shared_ptr<struct VarExpr>,
 	std::shared_ptr<struct RedefExpr>,
-	std::shared_ptr<struct LogicExpr> >;
+	std::shared_ptr<struct LogicExpr>,
+	std::shared_ptr<struct CallExpr> >;
 
 struct BinaryExpr
 {
@@ -86,6 +88,16 @@ struct LogicExpr
 
 	LogicExpr (Expr left_in, loxc::token op_in, Expr right_in)
 		: left(std::move(left_in)), op(std::move(op_in)), right(std::move(right_in)) {}
+};
+
+struct CallExpr
+{
+	Expr callee;
+	loxc::token closing_paren;
+	std::vector<Expr> args;
+
+	CallExpr (Expr callee_in, loxc::token closing_paren_in, std::vector<Expr> args_in)
+		: callee(std::move(callee_in)), closing_paren(std::move(closing_paren_in)), args(std::move(args_in)) {}
 };
 
 #endif

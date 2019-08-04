@@ -23,7 +23,8 @@ using Stmt = std::variant<
 	std::shared_ptr<struct VarStmt>,
 	std::shared_ptr<struct BlockStmt>,
 	std::shared_ptr<struct IfStmt>,
-	std::shared_ptr<struct WhileStmt> >;
+	std::shared_ptr<struct WhileStmt>,
+	std::shared_ptr<struct FuncStmt> >;
 
 struct PrintStmt
 {
@@ -75,6 +76,16 @@ struct WhileStmt
 
 	WhileStmt (Expr condition_in, Stmt body_in)
 		: condition(std::move(condition_in)), body(std::move(body_in)) {}
+};
+
+struct FuncStmt
+{
+	loxc::token name;
+	std::vector<loxc::token> params;
+	Stmt body;
+
+	FuncStmt (loxc::token name_in, std::vector<loxc::token> params_in, Stmt body_in)
+		: name(std::move(name_in)), params(std::move(params_in)), body(std::move(body_in)) {}
 };
 
 #endif

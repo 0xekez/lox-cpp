@@ -2,10 +2,12 @@
 #include <sstream>
 #include <memory>
 #include <initializer_list>
+#include <functional>
 
 #include "expr.h"
 #include "op.h"
 #include "stmt.h"
+#include "callable.h"
 
 /**
  * INTERPRETER
@@ -111,11 +113,52 @@ Val op::interpreter::operator()(std::shared_ptr<LogicExpr> e)
     return std::visit(op::interpreter(env), e->right);
 }
 
+Val op::interpreter::operator()(std::shared_ptr<CallExpr> e)
+{
+    Val callee = std::visit(op::interpreter(env), e->callee);
+
+    std::vector<Val> args;
+    std::transform(e->args.begin(), e->args.end(), std::back_inserter(args),
+        [=] (Expr in)-> Val { return std::visit(op::interpreter(env), in); } );
+
+    if ( ! std::holds_alternative<std::shared_ptr<loxc::callable>>(callee) )
+        throw runtime_error(e->closing_paren, "Object is not callable.");
+    
+    auto f = std::get<std::shared_ptr<loxc::callable>>(callee);
+
+    return f->func(env, args);
+}
+
 Val op::interpreter::operator()(std::shared_ptr<PrintStmt> s)
 {
     Val value = std::visit(interpreter(env), s->expression);
     std::cout << value << "\n";
     return std::monostate{};
+}
+
+Val op::interpreter::operator()(std::shared_ptr<FuncStmt> s)
+{
+    auto f = std::make_shared<loxc::callable>(s->name.lexme, 
+    [s](std::shared_ptr<Enviroment> env, std::vector<Val> args)-> Val{
+        auto my_env = std::make_shared<Enviroment>();
+        my_env->parent = env;
+        
+        auto params_it = s->params.begin();
+        auto args_it = args.begin();
+        auto end = s->params.end();
+
+        while (params_it < end)
+        {
+            my_env->define(params_it->lexme, *args_it);
+            std::advance(params_it, 1);
+            std::advance(args_it, 1);
+        }
+
+        return std::visit(op::interpreter(std::move(my_env)), s->body);
+        });
+
+    env->define(s->name.lexme, f);
+    return f;
 }
 
 Val op::interpreter::operator()(std::shared_ptr<ExprStmt> s)

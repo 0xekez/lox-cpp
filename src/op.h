@@ -11,16 +11,6 @@
 #include "stmt.h"
 #include "enviroment.h"
 
-#define DECLARE_EXPR_VISITOR(return_type)                   \
-return_type operator()(std::shared_ptr<BinaryExpr> e);      \
-return_type operator()(std::shared_ptr<GroupingExpr> e);    \
-return_type operator()(std::shared_ptr<LiteralExpr> e);     \
-return_type operator()(std::shared_ptr<UnaryExpr> e);       \
-return_type operator()(std::shared_ptr<VarExpr> e);         \
-return_type operator()(std::shared_ptr<RedefExpr> e);       \
-return_type operator()(std::shared_ptr<LogicExpr> e);       \
-return_type operator()(std::monostate);                     \
-
 namespace op
 {
 
@@ -32,7 +22,15 @@ struct interpreter
     : env(parent_in)
     {}
 
-    DECLARE_EXPR_VISITOR(Val)
+    // Expressions
+    Val operator()(std::shared_ptr<BinaryExpr> e);
+    Val operator()(std::shared_ptr<GroupingExpr> e);
+    Val operator()(std::shared_ptr<LiteralExpr> e);
+    Val operator()(std::shared_ptr<UnaryExpr> e);
+    Val operator()(std::shared_ptr<VarExpr> e);
+    Val operator()(std::shared_ptr<RedefExpr> e);
+    Val operator()(std::shared_ptr<LogicExpr> e);
+    Val operator()(std::shared_ptr<CallExpr> e);
 
     // TODO(zeke): Evaluating a statement in lox currently returns the last
     // value that was evaluated in the statement. At present this is not
@@ -45,6 +43,10 @@ struct interpreter
     Val operator()(std::shared_ptr<BlockStmt> s);
     Val operator()(std::shared_ptr<IfStmt> s);
     Val operator()(std::shared_ptr<WhileStmt> s);
+    Val operator()(std::shared_ptr<FuncStmt> s);
+
+    // std::monostate is roughly equal to null.
+    Val operator()(std::monostate);
         
     inline void assert_numeric(loxc::token op, const Val& v1, const Val& v2)
     {

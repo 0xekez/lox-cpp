@@ -17,7 +17,9 @@
 #include "reporter.h"
 #include "enviroment.h"
 
-std::shared_ptr<Enviroment> global_env(new Enviroment());
+#include "builtins/time.h"
+
+static std::shared_ptr<Enviroment> global_env(new Enviroment());
 
 enum return_status
 {
@@ -32,6 +34,8 @@ int run(std::string s);
 
 int main(int argc, char **argv)
 {
+  global_env->define("lox_time", builtins::time);
+
   if (argc > 2)
   {
     std::cout << "usage: jlox [script]\n";

@@ -55,6 +55,7 @@ Stmt Parser::variableDeclaration()
 
 Stmt Parser::statement()
 {
+    if (match(loxc::FUN)) return funcStatement();
     if (match(loxc::PRINT)) return printStatement();
     if (match(loxc::LEFT_BRACE)) return blockStatement();
     if (match(loxc::IF)) return ifStatement();
@@ -69,6 +70,23 @@ Stmt Parser::printStatement()
     Expr value = expression();
     consume(loxc::SEMICOLON, "Expected ; after print statment.");
     return std::make_shared<PrintStmt>(std::move(value));
+}
+
+Stmt Parser::funcStatement()
+{
+    loxc::token name = consume(loxc::ID, "Expected a function name.");
+    consume(loxc::LEFT_PAREN, "Expected opening '(' after function definition.");
+
+    std::vector<loxc::token> params;
+    if ( ! check(loxc::RIGHT_PAREN) )
+        do {
+            params.push_back(consume(loxc::ID, "Expected a parameter name."));
+        } while(match(loxc::COMMA));
+
+    consume(loxc::RIGHT_PAREN, "Expected closing ')' after function parameters.");
+
+    Stmt body = statement();
+    return std::make_shared<FuncStmt>(std::move(name), std::move(params), std::move(body));
 }
 
 Stmt Parser::blockStatement()
@@ -250,7 +268,38 @@ Expr Parser::unary()
         Expr right = unary();
         return std::make_shared<UnaryExpr>(op, right);
     }
-    return primary();
+    return call();
+}
+
+Expr Parser::call()
+{
+    Expr who = primary();
+
+    while (true)
+    {
+        if ( match (loxc::LEFT_PAREN) )
+            who = finishCall(std::move(who));
+        else
+            break;
+    }
+
+    return who;
+}
+
+Expr Parser::finishCall(Expr callee)
+{
+    std::vector<Expr> args;
+    if ( ! check(loxc::RIGHT_PAREN) )
+        do {
+            args.push_back(expression());
+        } while ( match(loxc::COMMA) );
+
+    if (args.size() >= 255)
+        error(peek(), "Functions can have a maximum of 255 arguments.");
+
+    loxc::token paren = consume(loxc::RIGHT_PAREN, "Expected ')' after function call.");
+
+    return std::make_shared<CallExpr>(callee, paren, args);
 }
 
 Expr Parser::primary()

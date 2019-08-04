@@ -31,6 +31,7 @@ private:
     Stmt variableDeclaration();
     Stmt statement();
     Stmt printStatement();
+    Stmt funcStatement();
     Stmt blockStatement();
     Stmt ifStatement();
     Stmt whileStatement();
@@ -46,6 +47,8 @@ private:
     Expr addition();
     Expr multiplication();
     Expr unary();
+    Expr call();
+    Expr finishCall(Expr callee);
     Expr primary();
 
     bool match(loxc::token_type in)

@@ -5,12 +5,19 @@
 #include <variant>
 #include <string>
 #include <iostream>
+#include <memory>
+
+namespace loxc
+{
+    struct callable;
+}
 
 using Val = std::variant<
     std::monostate,
     double,
     std::string,
-    bool>;
+    bool,
+    std::shared_ptr<loxc::callable> >;
 
 std::ostream &operator<<(std::ostream &o, const Val& v);
 
