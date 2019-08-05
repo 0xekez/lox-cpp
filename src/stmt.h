@@ -24,7 +24,8 @@ using Stmt = std::variant<
 	std::shared_ptr<struct BlockStmt>,
 	std::shared_ptr<struct IfStmt>,
 	std::shared_ptr<struct WhileStmt>,
-	std::shared_ptr<struct FuncStmt> >;
+	std::shared_ptr<struct FuncStmt>,
+	std::shared_ptr<struct ReturnStmt> >;
 
 struct PrintStmt
 {
@@ -86,6 +87,15 @@ struct FuncStmt
 
 	FuncStmt (loxc::token name_in, std::vector<loxc::token> params_in, Stmt body_in)
 		: name(std::move(name_in)), params(std::move(params_in)), body(std::move(body_in)) {}
+};
+
+struct ReturnStmt
+{
+	loxc::token keyword;
+	Expr value;
+
+	ReturnStmt (loxc::token keyword_in, Expr value_in)
+		: keyword(std::move(keyword_in)), value(std::move(value_in)) {}
 };
 
 #endif

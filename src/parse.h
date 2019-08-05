@@ -32,6 +32,7 @@ private:
     Stmt statement();
     Stmt printStatement();
     Stmt funcStatement();
+    Stmt returnStatement();
     Stmt blockStatement();
     Stmt ifStatement();
     Stmt whileStatement();

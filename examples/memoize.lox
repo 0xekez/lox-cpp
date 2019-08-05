@@ -1,0 +1,72 @@
+// A questionable and fairly slow way to memoize a function in lox.
+// Based on my testing this is actually slightly faster than a
+// non-memoized function, but it is really such a small difference
+// that you probably shouldn't do it. Here is the results for the 
+// memoized and non-memoized versions:
+
+// ---------
+// memoized:
+// ---------
+// 832040
+//
+// real	0m16.927s
+// user	0m16.898s
+// sys	0m0.013s
+
+// -------------
+// non-memoized:
+// -------------
+// 832040
+//
+// real	0m17.438s
+// user	0m17.376s
+// sys	0m0.027s
+
+// What this is good for though is as an example of how well lox is
+// actually working under the hood right now. It's not a fast 
+// langauge at all, but its working quite nicely.
+
+fun memoize(f)
+{
+    fun has(x)
+        return 0;
+
+    fun stacker(f, g)
+    {
+        fun either(x)
+            return f(x) or g(x);
+        
+        return either;
+    }
+
+    fun memoized(x)
+    {
+        var h = has(x);
+        if (h == false)
+            {
+            return h;
+            }
+        h = f(x);
+        fun newfun(x)
+        {
+            if (x == h)
+                return x;
+            return 0;
+        }
+        has = stacker(newfun, has);
+        return h;
+    }
+    
+    return memoized;
+}
+
+fun fib(x)
+{
+    if (x < 2)
+        return x;
+    return fib(x - 1) + fib(x - 2);
+}
+
+print fib(30);
+
+// print memoize(fib)(30);

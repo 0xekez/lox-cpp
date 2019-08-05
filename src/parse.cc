@@ -55,6 +55,7 @@ Stmt Parser::variableDeclaration()
 
 Stmt Parser::statement()
 {
+    if (match(loxc::RETURN)) return returnStatement();
     if (match(loxc::FUN)) return funcStatement();
     if (match(loxc::PRINT)) return printStatement();
     if (match(loxc::LEFT_BRACE)) return blockStatement();
@@ -87,6 +88,17 @@ Stmt Parser::funcStatement()
 
     Stmt body = statement();
     return std::make_shared<FuncStmt>(std::move(name), std::move(params), std::move(body));
+}
+
+Stmt Parser::returnStatement()
+{
+    loxc::token keyword = previous();
+    Expr val;
+    // only read an expression if there is one.
+    if (! check(loxc::SEMICOLON) )
+        val = expression();
+    consume(loxc::SEMICOLON, "Expexted ';' after return statement.");
+    return std::make_shared<ReturnStmt>(std::move(keyword), std::move(val));
 }
 
 Stmt Parser::blockStatement()

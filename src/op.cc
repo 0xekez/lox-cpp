@@ -119,14 +119,20 @@ Val op::interpreter::operator()(std::shared_ptr<CallExpr> e)
 
     std::vector<Val> args;
     std::transform(e->args.begin(), e->args.end(), std::back_inserter(args),
-        [=] (Expr in)-> Val { return std::visit(op::interpreter(env), in); } );
+        [this] (Expr in)-> Val { return std::visit(op::interpreter(env), in); } );
 
     if ( ! std::holds_alternative<std::shared_ptr<loxc::callable>>(callee) )
         throw runtime_error(e->closing_paren, "Object is not callable.");
     
     auto f = std::get<std::shared_ptr<loxc::callable>>(callee);
 
-    return f->func(env, args);
+    try
+    {
+        return f->func(args);
+    } catch (const op::return_stmt& r)
+    {
+        return r.v;
+    }
 }
 
 Val op::interpreter::operator()(std::shared_ptr<PrintStmt> s)
@@ -138,11 +144,13 @@ Val op::interpreter::operator()(std::shared_ptr<PrintStmt> s)
 
 Val op::interpreter::operator()(std::shared_ptr<FuncStmt> s)
 {
+    auto closure = env;
+
     auto f = std::make_shared<loxc::callable>(s->name.lexme, 
-    [s](std::shared_ptr<Enviroment> env, std::vector<Val> args)-> Val{
+    [s, closure](std::vector<Val> args)-> Val{
         auto my_env = std::make_shared<Enviroment>();
-        my_env->parent = env;
-        
+        my_env->parent = closure;
+
         auto params_it = s->params.begin();
         auto args_it = args.begin();
         auto end = s->params.end();
@@ -154,11 +162,19 @@ Val op::interpreter::operator()(std::shared_ptr<FuncStmt> s)
             std::advance(args_it, 1);
         }
 
-        return std::visit(op::interpreter(std::move(my_env)), s->body);
+        return std::visit(op::interpreter(my_env), s->body);
         });
 
     env->define(s->name.lexme, f);
     return f;
+}
+
+Val op::interpreter::operator()(std::shared_ptr<ReturnStmt>  s)
+{
+    Val value(std::monostate{});
+    if ( ! std::holds_alternative<std::monostate>(s->value) )
+        value = std::visit(op::interpreter(std::move(env)), s->value);
+    throw op::return_stmt(value);
 }
 
 Val op::interpreter::operator()(std::shared_ptr<ExprStmt> s)

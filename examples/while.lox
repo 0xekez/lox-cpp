@@ -1,0 +1,18 @@
+var str = "tick";
+var count = 2;
+
+while (count != 0)
+    {
+    str = str + " tick";
+    count = count - 1;
+    }
+
+print str;
+print "^---tick tick tick";
+
+count = 1;
+
+while (count == 1)
+    print count = count - 1;
+
+print "^---0";

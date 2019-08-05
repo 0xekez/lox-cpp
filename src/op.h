@@ -14,6 +14,15 @@
 namespace op
 {
 
+struct return_stmt : public std::runtime_error
+{
+    using std::runtime_error::runtime_error;
+    Val v;
+    return_stmt(Val v) :
+    std::runtime_error("if you're seeing this something has gone very wrong"),
+    v(std::move(v)) {}
+};
+
 struct interpreter
 {
     std::shared_ptr<Enviroment> env;
@@ -34,9 +43,8 @@ struct interpreter
 
     // TODO(zeke): Evaluating a statement in lox currently returns the last
     // value that was evaluated in the statement. At present this is not
-    // accessible from the sripting layer, but I keep doing it as I think 
-    // that the idea that an if/while/print/... statement could return a val
-    // could prove to be quite powerful.
+    // accessible from the sripting layer, except on function returns. I wish
+    // that everything could just be an expression and have a return value.
     Val operator()(std::shared_ptr<PrintStmt> s);
     Val operator()(std::shared_ptr<ExprStmt> s);
     Val operator()(std::shared_ptr<VarStmt> s);
@@ -44,6 +52,7 @@ struct interpreter
     Val operator()(std::shared_ptr<IfStmt> s);
     Val operator()(std::shared_ptr<WhileStmt> s);
     Val operator()(std::shared_ptr<FuncStmt> s);
+    Val operator()(std::shared_ptr<ReturnStmt> s);
 
     // std::monostate is roughly equal to null.
     Val operator()(std::monostate);
