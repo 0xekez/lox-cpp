@@ -67,6 +67,6 @@ fun fib(x)
     return fib(x - 1) + fib(x - 2);
 }
 
-print fib(30);
+// print fib(30);
 
-// print memoize(fib)(30);
+print memoize(fib)(30);

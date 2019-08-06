@@ -40,9 +40,10 @@ private:
     Stmt expressionStatement();
 
     Expr expression();
+    Expr assignment();
+    Expr anonymous_function();
     Expr logical_or();
     Expr logical_and();
-    Expr assignment();
     Expr equality();
     Expr comparason();
     Expr addition();

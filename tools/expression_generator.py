@@ -71,6 +71,7 @@ def main ():
 
     dest_file.write(make_init())
     dest_file.write(make_expr_using_declaration(names))
+    dest_file.write('#include "stmt.h"\n\n')
     
     for class_name, rest in classes:
         dest_file.write(make_expr(class_name, rest))

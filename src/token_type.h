@@ -51,6 +51,7 @@ enum token_type
   VAR,
   WHILE,
   ABORT,
+  ANON,
 
   // literals
   STRING,

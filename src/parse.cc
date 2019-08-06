@@ -203,7 +203,7 @@ Expr Parser::expression()
 Expr Parser::assignment()
     {
     // or -> and -> equality
-    Expr expr = logical_or();
+    Expr expr = anonymous_function();
 
     if(match(loxc::EQUAL))
         {
@@ -220,6 +220,25 @@ Expr Parser::assignment()
 
     return expr;
     }
+
+Expr Parser::anonymous_function()
+{
+    if (match(loxc::ANON))
+    {
+        consume(loxc::LEFT_PAREN, "Expected opening '(' after function definition.");
+
+        std::vector<loxc::token> params;
+        if ( ! check(loxc::RIGHT_PAREN) )
+            do {
+                params.push_back(consume(loxc::ID, "Expected a parameter name."));
+            } while(match(loxc::COMMA));
+        auto closing_paren = consume(loxc::RIGHT_PAREN, "Expected closing ')' after function parameters.");
+
+        Stmt body = statement();
+        return std::make_shared<FunExpr>(std::move(params), std::move(body), std::move(closing_paren));
+    }
+    return logical_or();
+}
 
 Expr Parser::logical_or()
 {
@@ -370,6 +389,7 @@ void Parser::synchronize()
         {
         case loxc::CLASS:
         case loxc::FUN:
+        case loxc::ANON:
         case loxc::VAR:
         case loxc::FOR:
         case loxc::IF:

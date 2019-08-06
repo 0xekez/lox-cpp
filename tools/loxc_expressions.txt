@@ -26,3 +26,4 @@ LogicExpr    : Expr left, loxc::token op, Expr right
 
 # Functions!
 CallExpr     : Expr callee, loxc::token closing_paren, std::vector<Expr> args
+FunExpr      : std::vector<loxc::token> params, Stmt body, loxc::token closing_paren

@@ -1,0 +1,19 @@
+// lox supports anonymous functions like regular functions. You 
+// will need to use the `anon` keyword to use them though. This
+// is because I thought having both work under one delcaration
+// would be strange because the below would parse as a func stmt
+// and error as it has no name.
+
+(anon(x) print x;)(2);
+
+// implicit returns
+var double = anon(x) x*2;;
+print double(4);
+var two = double;
+double = 4;
+print two(4);
+
+// you can also do recursion with anonymous functions unlike
+// some other langauges
+var a = anon(n) if (n < 2) n; else a(n - 1) + a(n - 2);;
+print a(10);

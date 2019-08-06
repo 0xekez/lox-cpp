@@ -26,7 +26,10 @@ using Expr = std::variant<
 	std::shared_ptr<struct VarExpr>,
 	std::shared_ptr<struct RedefExpr>,
 	std::shared_ptr<struct LogicExpr>,
-	std::shared_ptr<struct CallExpr> >;
+	std::shared_ptr<struct CallExpr>,
+	std::shared_ptr<struct FunExpr> >;
+
+#include "stmt.h"
 
 struct BinaryExpr
 {
@@ -98,6 +101,16 @@ struct CallExpr
 
 	CallExpr (Expr callee_in, loxc::token closing_paren_in, std::vector<Expr> args_in)
 		: callee(std::move(callee_in)), closing_paren(std::move(closing_paren_in)), args(std::move(args_in)) {}
+};
+
+struct FunExpr
+{
+	std::vector<loxc::token> params;
+	Stmt body;
+	loxc::token closing_paren;
+
+	FunExpr (std::vector<loxc::token> params_in, Stmt body_in, loxc::token closing_paren_in)
+		: params(std::move(params_in)), body(std::move(body_in)), closing_paren(std::move(closing_paren_in)) {}
 };
 
 #endif

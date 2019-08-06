@@ -51,6 +51,8 @@ std::ostream &operator<<(std::ostream &o, loxc::token_type n)
     return o << "FALSE";
   case loxc::FUN:
     return o << "FUN";
+  case loxc::ANON:
+    return o << "ANON";
   case loxc::FOR:
     return o << "FOR";
   case loxc::IF:

@@ -40,6 +40,7 @@ struct interpreter
     Val operator()(std::shared_ptr<RedefExpr> e);
     Val operator()(std::shared_ptr<LogicExpr> e);
     Val operator()(std::shared_ptr<CallExpr> e);
+    Val operator()(std::shared_ptr<FunExpr> e);
 
     // TODO(zeke): Evaluating a statement in lox currently returns the last
     // value that was evaluated in the statement. At present this is not

@@ -49,6 +49,7 @@ const std::unordered_map<std::string, loxc::token_type> keywords_map =
         {"true", loxc::TRUE},
         {"false", loxc::FALSE},
         {"fun", loxc::FUN},
+        {"anon", loxc::ANON},
         {"for", loxc::FOR},
         {"nil", loxc::NIL},
         {"or", loxc::OR},

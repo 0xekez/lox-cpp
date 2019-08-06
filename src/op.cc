@@ -123,7 +123,7 @@ Val op::interpreter::operator()(std::shared_ptr<CallExpr> e)
 
     if ( ! std::holds_alternative<std::shared_ptr<loxc::callable>>(callee) )
         throw runtime_error(e->closing_paren, "Object is not callable.");
-    
+
     auto f = std::get<std::shared_ptr<loxc::callable>>(callee);
 
     try
@@ -133,6 +133,38 @@ Val op::interpreter::operator()(std::shared_ptr<CallExpr> e)
     {
         return r.v;
     }
+}
+
+Val op::interpreter::operator()(std::shared_ptr<FunExpr> e)
+{
+    auto closure = env;
+
+    auto f = std::make_shared<loxc::callable>("<anonymous function>", 
+    [closure, e](std::vector<Val> args)-> Val{
+        if (e->params.size() != args.size())
+            throw op::runtime_error(e->closing_paren, 
+            "Wrong number of arguments to function. "
+            "Expected " + std::to_string(e->params.size()) +  
+            " got " + std::to_string(args.size()));
+
+        auto my_env = std::make_shared<Enviroment>();
+        my_env->parent = closure;
+
+        auto params_it = e->params.begin();
+        auto args_it = args.begin();
+        auto end = e->params.end();
+
+        while (params_it < end)
+        {
+            my_env->define(params_it->lexme, *args_it);
+            std::advance(params_it, 1);
+            std::advance(args_it, 1);
+        }
+
+        return std::visit(op::interpreter(my_env), e->body);
+        });
+
+    return f;
 }
 
 Val op::interpreter::operator()(std::shared_ptr<PrintStmt> s)
