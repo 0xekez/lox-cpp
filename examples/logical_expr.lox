@@ -12,7 +12,7 @@ print "^---dog";
 print "dog" and "cat";
 print "^---cat";
 
-// or yields the last item that is true
+// or yields the first item that is true
 print "dog" or "cat";
 print "^---dog";
 
